@@ -50,7 +50,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-o
 .screen.on{display:flex;flex-direction:column}
 
 /* SETUP SCREEN */
-.logo{margin:20px auto 10px;text-align:center}
+.logo{margin:20px auto 10px;text-align:center;touch-action:none;-webkit-touch-callout:none}
 .logo .l1{font-weight:900;font-size:clamp(40px,12vw,58px);line-height:1;color:var(--gold);text-shadow:0 3px 0 var(--gold-dark),0 6px 12px rgba(0,0,0,.4)}
 .logo .l2{display:flex;gap:6px;justify-content:center;margin-top:10px}
 .logo .l2 b{width:42px;height:42px;border-radius:10px;display:grid;place-items:center;font-size:24px;font-weight:900;color:#fff;box-shadow:0 4px 0 rgba(0,0,0,.35)}
@@ -76,7 +76,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-o
 /* GAME SCREEN */
 #game{padding:6px 6px 14px;justify-content:center;gap:8px}
 .bar{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:0 4px}
-.bar button{background:rgba(255,255,255,.14);color:#fff;padding:6px 14px;border-radius:10px;font-weight:800;border:1px solid rgba(255,255,255,.18)}
+.bar button{background:rgba(255,255,255,.14);color:#fff;padding:6px 14px;border-radius:10px;font-weight:800;border:1px solid rgba(255,255,255,.18);touch-action:none;-webkit-touch-callout:none}
 .msg{font-weight:800;font-size:15px;text-align:center;min-height:22px;flex:1;color:#ffeb99;text-shadow:0 2px 4px rgba(0,0,0,.4)}
 
 /* PLAYER HUD CARDS */
@@ -300,14 +300,195 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-o
   <div class="row2"><button class="btn2" id="pairClose">Close</button><button class="btn1" id="pairGo">Connect</button></div>
 </div></div>
 
-<div class="overlay" id="menuOv"><div class="box"><h3>Paused</h3><div class="row2"><button class="btn2" id="resume">Resume</button><button class="btn1" id="quit">New game</button></div></div></div>
+<div class="overlay" id="menuOv">
+  <div class="box">
+    <h3>Paused</h3>
+    <button class="wide" id="soundBtn">Sound: on</button>
+    <div class="row2"><button class="btn2" id="resume">Resume</button><button class="btn1" id="quit">New game</button></div>
+  </div>
+</div>
 <div class="overlay" id="winOv"><div class="box"><h3 id="winT">Winner!</h3><div id="winB"></div><div class="row2"><button class="btn1" id="again">Play again</button></div></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
 (function(){
 "use strict";
-const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];  /* EXACT THEME PALETTE */ const HEX={   blue:"#00a2ff",   // Bottom-Left (Player 1)   red:"#e51923",    // Top-Left (Player 2)   green:"#00a843",  // Top-Right (Player 3)   yellow:"#ffd200"  // Bottom-Right (Player 4) }; const LABEL={blue:"Player 1",red:"Player 2",green:"Player 3",yellow:"Player 4"}; const ORDER=["blue","red","green","yellow"]; const TEAM={blue:"A",green:"A",red:"B",yellow:"B"}; const PIPS={1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};  /* PIN BADGE BUILDER */ function renderPinBadges(){   $$(".pin-badge").forEach(el=>{
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+
+/* ---------- REALISTIC LUDO KING AUDIO (WEB AUDIO API) ---------- */
+const SFX = {
+  ac: null,
+  on: true,
+  init() {
+    try { this.on = localStorage.getItem("cl_sound") !== "off"; } catch(e){}
+    if (!this.on) return null;
+    if (!this.ac) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) this.ac = new AudioCtx();
+    }
+    if (this.ac && this.ac.state === "suspended") {
+      this.ac.resume();
+    }
+    return this.ac;
+  },
+  toggle() {
+    this.on = !this.on;
+    try { localStorage.setItem("cl_sound", this.on ? "on" : "off"); } catch(e){}
+    return this.on;
+  },
+  // Exact Ludo King dice cup shake sequence: quick rattles + firm board thud
+  dice() {
+    const a = this.init();
+    if (!a) return;
+    const now = a.currentTime;
+    const clatters = [
+      { t: 0.00, f: 520, q: 16, dur: 0.045, g: 0.45 },
+      { t: 0.05, f: 880, q: 22, dur: 0.040, g: 0.55 },
+      { t: 0.10, f: 640, q: 18, dur: 0.045, g: 0.60 },
+      { t: 0.15, f: 940, q: 20, dur: 0.040, g: 0.65 },
+      { t: 0.21, f: 580, q: 16, dur: 0.045, g: 0.70 },
+      { t: 0.27, f: 1100, q: 24, dur: 0.040, g: 0.80 },
+      { t: 0.33, f: 720, q: 18, dur: 0.050, g: 0.75 },
+      // Final wooden board impact
+      { t: 0.42, f: 360, q: 8, dur: 0.100, g: 0.95 }
+    ];
+
+    clatters.forEach(hit => {
+      const time = now + hit.t;
+      // Filtered noise click
+      const bufSize = Math.floor(a.sampleRate * hit.dur);
+      const buf = a.createBuffer(1, bufSize, a.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < bufSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufSize * 0.28));
+      }
+      const noise = a.createBufferSource();
+      noise.buffer = buf;
+
+      const filter = a.createBiquadFilter();
+      filter.type = "bandpass";
+      filter.frequency.setValueAtTime(hit.f, time);
+      filter.Q.setValueAtTime(hit.q, time);
+
+      const nGain = a.createGain();
+      nGain.gain.setValueAtTime(hit.g, time);
+      nGain.gain.exponentialRampToValueAtTime(0.001, time + hit.dur);
+
+      noise.connect(filter).connect(nGain).connect(a.destination);
+      noise.start(time);
+
+      // Resonant body thump
+      const osc = a.createOscillator();
+      const oGain = a.createGain();
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(hit.f * 0.7, time);
+      osc.frequency.exponentialRampToValueAtTime(hit.f * 0.25, time + hit.dur);
+
+      oGain.gain.setValueAtTime(hit.g * 0.6, time);
+      oGain.gain.exponentialRampToValueAtTime(0.001, time + hit.dur);
+
+      osc.connect(oGain).connect(a.destination);
+      osc.start(time);
+      osc.stop(time + hit.dur);
+    });
+  },
+  step() {
+    const a = this.init(); if (!a) return;
+    const now = a.currentTime;
+    const osc = a.createOscillator(), g = a.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(540, now);
+    osc.frequency.exponentialRampToValueAtTime(260, now + 0.07);
+    g.gain.setValueAtTime(0.28, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+    osc.connect(g).connect(a.destination);
+    osc.start(now); osc.stop(now + 0.07);
+  },
+  out() {
+    const a = this.init(); if (!a) return;
+    const now = a.currentTime;
+    [392, 587].forEach((f, idx) => {
+      const t = now + idx * 0.07;
+      const osc = a.createOscillator(), g = a.createGain();
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(f, t);
+      g.gain.setValueAtTime(0.25, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
+      osc.connect(g).connect(a.destination);
+      osc.start(t); osc.stop(t + 0.09);
+    });
+  },
+  cut() {
+    const a = this.init(); if (!a) return;
+    const now = a.currentTime;
+    const osc = a.createOscillator(), g = a.createGain();
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(520, now);
+    osc.frequency.exponentialRampToValueAtTime(90, now + 0.25);
+    g.gain.setValueAtTime(0.35, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+    osc.connect(g).connect(a.destination);
+    osc.start(now); osc.stop(now + 0.25);
+  },
+  six() {
+    const a = this.init(); if (!a) return;
+    const now = a.currentTime;
+    [880, 1175].forEach((f, idx) => {
+      const t = now + idx * 0.06;
+      const osc = a.createOscillator(), g = a.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(f, t);
+      g.gain.setValueAtTime(0.22, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+      osc.connect(g).connect(a.destination);
+      osc.start(t); osc.stop(t + 0.1);
+    });
+  },
+  home() {
+    const a = this.init(); if (!a) return;
+    const now = a.currentTime;
+    [523, 659, 784, 1047].forEach((f, idx) => {
+      const t = now + idx * 0.08;
+      const osc = a.createOscillator(), g = a.createGain();
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(f, t);
+      g.gain.setValueAtTime(0.3, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+      osc.connect(g).connect(a.destination);
+      osc.start(t); osc.stop(t + 0.16);
+    });
+  },
+  win() {
+    const a = this.init(); if (!a) return;
+    const now = a.currentTime;
+    [523, 659, 784, 659, 784, 1047].forEach((f, idx) => {
+      const t = now + idx * 0.13;
+      const osc = a.createOscillator(), g = a.createGain();
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(f, t);
+      g.gain.setValueAtTime(0.35, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+      osc.connect(g).connect(a.destination);
+      osc.start(t); osc.stop(t + 0.22);
+    });
+  }
+};
+
+/* EXACT THEME PALETTE */
+const HEX={
+  blue:"#00a2ff",   // Bottom-Left (Player 1)
+  red:"#e51923",    // Top-Left (Player 2)
+  green:"#00a843",  // Top-Right (Player 3)
+  yellow:"#ffd200"  // Bottom-Right (Player 4)
+};
+const LABEL={blue:"Player 1",red:"Player 2",green:"Player 3",yellow:"Player 4"};
+const ORDER=["blue","red","green","yellow"];
+const TEAM={blue:"A",green:"A",red:"B",yellow:"B"};
+const PIPS={1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};
+
+/* PIN BADGE BUILDER */
+function renderPinBadges(){
+  $$(".pin-badge").forEach(el=>{
     const c=el.dataset.c;
     el.innerHTML=`
       <svg viewBox="0 0 32 38" fill="none">
@@ -462,7 +643,7 @@ segBind("#modeSeg","mode",()=>{
 });
 segBind("#countSeg","count",renderNames);
 $("#fkSw").onclick=()=>{setup.fk=!setup.fk;$("#fkSw").classList.toggle("on",setup.fk);$("#fkSw").setAttribute("aria-checked",setup.fk)};
-$("#startBtn").onclick=startGame;  /* ---------- GAME CONTROLLER ---------- */ let G=null; const wait=ms=>new Promise(r=>setTimeout(r,ms)); function show(id){$$(".screen").forEach(s=>s.classList.toggle("on",s.id===id));}
+$("#startBtn").onclick=()=>{SFX.init();startGame();};  /* ---------- GAME CONTROLLER ---------- */ let G=null; const wait=ms=>new Promise(r=>setTimeout(r,ms)); function show(id){$$(".screen").forEach(s=>s.classList.toggle("on",s.id===id));}
 function setFace(el,v){
   el.innerHTML="";
   for(let i=0;i<9;i++){
@@ -571,10 +752,15 @@ async function roll(c){
   G.phase="anim";
   const pan=document.querySelector(`.pan[data-c="${c}"]`),face=pan.querySelector(".face");
   pan.classList.remove("canroll");
+  
+  // Play realistic Ludo King dice cup shake sound
+  SFX.dice();
+  
   const {v,forced}=pickValue(c);
   face.classList.add("spin");
   for(let k=0;k<7;k++){setFace(face,1+Math.floor(Math.random()*6));await wait(65);}
   face.classList.remove("spin");setFace(face,v);G.dice=v;
+  if(v===6)SFX.six();
   if(v===6){G.sixes++;if(G.sixes===3&&!forced){toast("Three sixes, turn lost");await wait(800);return nextTurn();}}
   else G.sixes=0;
   const toks=G.tokens[c],movable=[];
@@ -594,8 +780,12 @@ function choose(c,i){
 async function doMove(c,i){
   G.phase="anim";
   const d=G.dice,toks=G.tokens[c];
-  if(toks[i]<0){toks[i]=0;layout();await wait(180);}
-  else for(let s=0;s<d;s++){toks[i]++;layout();await wait(140);}
+  if(toks[i]<0){
+    toks[i]=0;layout();SFX.out();await wait(180);
+  }
+  else for(let s=0;s<d;s++){
+    toks[i]++;layout();SFX.step();await wait(140);
+  }
   const pos=toks[i];let captured=false;
   if(pos<=50){
     const abs=(C[c].start+pos)%52;
@@ -605,10 +795,10 @@ async function doMove(c,i){
         if(G.mode==="team"&&TEAM[p.c]===TEAM[c]&&!G.fk)continue;
         G.tokens[p.c].forEach((q,j)=>{if(q>=0&&q<=50&&(C[p.c].start+q)%52===abs){G.tokens[p.c][j]=-1;captured=true;}});
       }
-      if(captured){layout();toast("Cut!");await wait(300);}
+      if(captured){layout();SFX.cut();toast("Cut!");await wait(300);}
     }
   }
-  const home=pos===56;if(home)toast("Home!");
+  const home=pos===56;if(home){SFX.home();toast("Home!");}
   if(toks.every(p=>p===56)&&!G.done.includes(c)){
     G.done.push(c);document.querySelector(`.pan[data-c="${c}"]`).classList.add("done");
     if(checkOver())return;
@@ -631,7 +821,7 @@ function checkOver(){
 }
 
 function finish(title,line,ranks){
-  G.over=true;G.phase="over";$("#winT").textContent=title;const b=$("#winB");b.innerHTML="";
+  G.over=true;G.phase="over";SFX.win();$("#winT").textContent=title;const b=$("#winB");b.innerHTML="";
   if(line){const p=document.createElement("p");p.style.cssText="font-size:18px;font-weight:700";p.textContent=line;b.appendChild(p);}
   if(ranks){const ol=document.createElement("ol");ranks.forEach(c=>{const li=document.createElement("li");li.textContent=nameOf(c);li.style.color=HEX[c];ol.appendChild(li);});b.appendChild(ol);}
   $("#winOv").classList.add("on");sendStatus();
@@ -639,6 +829,9 @@ function finish(title,line,ranks){
 
 $("#again").onclick=()=>{$("#winOv").classList.remove("on");show("setup");};
 $("#menuBtn").onclick=()=>{if(!lp.fired)$("#menuOv").classList.add("on");};
+function soundLabel(){$("#soundBtn").textContent="Sound: "+(SFX.on?"on":"off");}
+soundLabel();
+$("#soundBtn").onclick=()=>{SFX.toggle();soundLabel();if(SFX.on)SFX.six();};
 $("#resume").onclick=()=>$("#menuOv").classList.remove("on");
 $("#quit").onclick=()=>{$("#menuOv").classList.remove("on");G=null;show("setup");sendStatus();};
 
