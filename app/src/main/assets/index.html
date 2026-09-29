@@ -71,92 +71,90 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-o
 .hint{color:#8eaecf;font-size:12px;margin-top:6px}
 
 /* GAME SCREEN */
-#game{padding:6px 6px 14px;justify-content:center;gap:8px}
-.bar{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:0 4px}
-.bar button{background:rgba(255,255,255,.14);color:#fff;padding:6px 14px;border-radius:10px;font-weight:800;border:1px solid rgba(255,255,255,.18)}
-.msg{font-weight:800;font-size:15px;text-align:center;min-height:22px;flex:1;color:#ffeb99;text-shadow:0 2px 4px rgba(0,0,0,.4)}
+body.ingame{
+  background-color:#1554a8;
+  background-image:
+    radial-gradient(circle at 50% 45%, rgba(40,120,220,.55) 0%, rgba(10,40,110,0) 70%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.10' stroke-width='5'%3E%3Crect x='18' y='18' width='56' height='56' rx='10' transform='rotate(-18 46 46)'/%3E%3Crect x='96' y='92' width='50' height='50' rx='9' transform='rotate(24 121 117)'/%3E%3C/g%3E%3Cg fill='%23000' fill-opacity='.18'%3E%3Ccircle cx='34' cy='40' r='5'/%3E%3Ccircle cx='58' cy='52' r='5'/%3E%3Ccircle cx='46' cy='46' r='5'/%3E%3Ccircle cx='110' cy='106' r='4.5'/%3E%3Ccircle cx='132' cy='128' r='4.5'/%3E%3C/g%3E%3C/svg%3E"),
+    linear-gradient(160deg,#1c64c4 0%,#0f4596 55%,#0b3478 100%);
+  background-size:100% 100%,160px 160px,100% 100%;
+}
+#game{padding:8px 0 70px;justify-content:center;gap:10px;position:relative;min-height:100vh}
+.gmsg{height:22px;display:flex;align-items:center;justify-content:center}
+.msg{font-weight:800;font-size:15px;text-align:center;color:#fff;text-shadow:0 2px 4px rgba(0,0,0,.5)}
+#menuBtn{
+  position:fixed;left:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:5;
+  width:48px;height:48px;border-radius:14px;padding:0;
+  background:linear-gradient(180deg,#2f7be0,#1a4fa8);border:3px solid #f2c230;
+  box-shadow:0 4px 8px rgba(0,0,0,.4);display:grid;place-items:center;
+}
+#menuBtn svg{width:24px;height:24px}
 
-/* PLAYER HUD CARDS */
-.prow{display:flex;justify-content:space-between;gap:8px}
+/* DICE PODS */
+.prow{display:flex;justify-content:space-between;padding:0 9%}
 .pan{
-  flex:1;max-width:49%;display:flex;align-items:center;gap:6px;padding:5px 8px;
-  border-radius:14px;
-  background:linear-gradient(180deg,#fff2e4 0%,#f0d5be 100%);
-  border:3px solid var(--panel-border);
-  box-shadow:0 4px 10px rgba(0,0,0,.35);
-  position:relative;
+  width:27%;aspect-ratio:1.85;display:flex;align-items:stretch;position:relative;
+  background:#f2c230;border-radius:8px;padding:3px;
+  box-shadow:0 4px 8px rgba(0,0,0,.35),inset 0 0 0 1px rgba(120,80,0,.4);
 }
 .pan.right{flex-direction:row-reverse}
 .pan.hide{visibility:hidden}
-.pan.act{
-  border-color:#ffea78;
-  box-shadow:0 0 0 3px rgba(255,234,120,.8),0 6px 14px rgba(0,0,0,.45);
-  transform:scale(1.02);
-}
 .pan.done{opacity:.45}
-
-.pin-badge{width:32px;height:38px;flex:none;position:relative;display:grid;place-items:center}
-.pin-badge svg{width:100%;height:100%}
-
-.pname{font-weight:800;font-size:14px;line-height:1.15;overflow:hidden;min-width:0;flex:1;color:#2c1b05}
-.pname span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pan.right .pname{text-align:right}
-.pname small{display:block;font-weight:700;color:#855c25;font-size:11px}
-
-.dice-slot{position:relative;display:flex;align-items:center}
+.pin-badge{
+  width:42%;flex:none;display:grid;place-items:center;
+  background:linear-gradient(180deg,#2a78e4 0%,#1552b6 100%);
+  border-radius:5px 0 0 5px;
+}
+.pan.right .pin-badge{border-radius:0 5px 5px 0}
+.pin-badge svg{width:62%;height:auto;filter:drop-shadow(0 2px 2px rgba(0,0,0,.4))}
+.pname{display:none}
+.dice-slot{flex:1;display:flex;position:static}
 .dice{
-  width:46px;height:46px;flex:none;border-radius:10px;background:#ffffff;
-  display:grid;place-items:center;
-  box-shadow:inset 0 0 4px rgba(0,0,0,.2),0 3px 6px rgba(0,0,0,.25);
-  border:1.5px solid #dcd1c2;
-  cursor:pointer;
-  touch-action:manipulation;
+  flex:1;margin:0;border-radius:6px;padding:0;
+  background:linear-gradient(180deg,#f7dcd8 0%,#e8bdb8 100%);
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.6),inset 0 -3px 6px rgba(150,70,70,.25);
+  display:grid;place-items:center;cursor:pointer;touch-action:manipulation;
 }
-.turn-arr{
-  position:absolute;width:0;height:0;
-  border-top:9px solid transparent;border-bottom:9px solid transparent;
-  display:none;
-}
-.pan:not(.right) .turn-arr{
-  left:-14px;border-right:12px solid #ffd200;
-  filter:drop-shadow(-2px 1px 2px rgba(0,0,0,.3));
-}
-.pan.right .turn-arr{
-  right:-14px;border-left:12px solid #ffd200;
-  filter:drop-shadow(2px 1px 2px rgba(0,0,0,.3));
-}
-.pan.act .turn-arr{display:block}
-
-.face{width:38px;height:38px;display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);padding:4px;pointer-events:none}
-.face i{width:7px;height:7px;border-radius:50%;place-self:center}
-.face i.on{background:#1a1a1a}
-.pan.act.canroll .dice{animation:pulse 1s ease-in-out infinite}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.face{width:64%;aspect-ratio:1;display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);padding:10%;pointer-events:none;border-radius:18%;visibility:hidden}
+.pan.act .face,.face.has{visibility:visible;background:linear-gradient(180deg,#fff 0%,#e6e6e6 100%);box-shadow:0 2px 3px rgba(0,0,0,.35),inset 0 -2px 3px rgba(0,0,0,.12)}
+.face i{width:78%;aspect-ratio:1;border-radius:50%;place-self:center}
+.face i.on{background:#111}
+.pan.act.canroll .face{animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
 .face.spin{animation:spin .5s linear}
 @keyframes spin{0%{transform:rotate(0) scale(1)}50%{transform:rotate(180deg) scale(.8)}100%{transform:rotate(360deg) scale(1)}}
+.turn-arr{
+  position:absolute;top:50%;width:34px;height:34px;display:none;pointer-events:none;
+  transform:translateY(-50%);filter:drop-shadow(0 2px 2px rgba(0,0,0,.35));
+}
+.turn-arr svg{width:100%;height:100%}
+.pan:not(.right) .turn-arr{left:calc(100% + 6px);animation:nudgeL .8s ease-in-out infinite}
+.pan.right .turn-arr{right:calc(100% + 6px);transform:translateY(-50%) scaleX(-1);animation:nudgeR .8s ease-in-out infinite}
+@keyframes nudgeL{0%,100%{margin-left:0}50%{margin-left:6px}}
+@keyframes nudgeR{0%,100%{margin-right:0}50%{margin-right:6px}}
+.pan.act .turn-arr{display:block}
 
 /* BOARD WRAPPER */
 .boardwrap{
-  position:relative;width:100%;aspect-ratio:1;border-radius:10px;overflow:hidden;
-  background:#ffffff;border:2px solid #333333;
-  box-shadow:0 12px 30px rgba(0,0,0,.6);
+  position:relative;width:calc(100% - 16px);margin:0 auto;aspect-ratio:1;overflow:visible;
+  background:#ffffff;box-shadow:0 10px 26px rgba(0,0,0,.5);
 }
 .boardwrap svg{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
 #tokens{position:absolute;inset:0;pointer-events:none}
 
-/* 3D PIN TOKENS */
+/* PIN TOKENS */
 .tok{
-  position:absolute;width:6.2%;height:6.2%;transform:translate(-50%,-65%);
+  position:absolute;width:7%;height:7%;transform:translate(-50%,-88%);
   transition:left .13s linear,top .13s linear,width .2s,height .2s;
   z-index:2;pointer-events:none;
 }
-.tok svg{width:100%;height:100%;display:block;filter:drop-shadow(0 4px 3px rgba(0,0,0,.35));pointer-events:none}
+.tok svg{width:100%;height:100%;display:block;overflow:visible;filter:drop-shadow(0 3px 2px rgba(0,0,0,.4));pointer-events:none}
 .tok.can{pointer-events:auto !important;cursor:pointer;z-index:10;animation:hop .6s ease-in-out infinite}
 .tok.can::after{
-  content:"";position:absolute;left:50%;bottom:-2px;transform:translateX(-50%);
-  width:130%;height:130%;border-radius:50%;border:2px dashed #fff;
+  content:"";position:absolute;left:50%;top:88%;transform:translate(-50%,-50%);
+  width:110%;height:110%;border-radius:50%;border:2px dashed #fff;box-shadow:0 0 6px rgba(0,0,0,.6);
 }
-@keyframes hop{0%,100%{transform:translate(-50%,-65%)}50%{transform:translate(-50%,-90%)}}
+@keyframes hop{0%,100%{transform:translate(-50%,-88%)}50%{transform:translate(-50%,-110%)}}
 
 /* MODALS */
 .overlay{position:fixed;inset:0;background:rgba(5,18,34,.75);display:none;align-items:center;justify-content:center;z-index:30;padding:20px}
@@ -219,8 +217,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-o
 
 <!-- GAME -->
 <section class="screen" id="game">
-  <div class="bar"><button type="button" id="menuBtn">Menu</button><div class="msg" id="msg"></div><span style="width:64px"></span></div>
-  
+  <div class="gmsg"><div class="msg" id="msg"></div></div>
   <div class="prow">
     <div class="pan" data-c="red">
       <div class="pin-badge" data-c="red"></div>
@@ -263,6 +260,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-o
       </div>
     </div>
   </div>
+  <button type="button" id="menuBtn" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><circle cx="5" cy="6" r="1.3" fill="#fff" stroke="none"/><circle cx="5" cy="12" r="1.3" fill="#fff" stroke="none"/><circle cx="5" cy="18" r="1.3" fill="#fff" stroke="none"/><path d="M9.5 6h10M9.5 12h10M9.5 18h10"/></svg></button>
 </section>
 
 <!-- REMOTE -->
@@ -482,12 +480,23 @@ const HEX={blue:"#00a2ff",red:"#e51923",green:"#00a843",yellow:"#ffd200"};
 const LABEL={blue:"Player 1",red:"Player 2",green:"Player 3",yellow:"Player 4"};
 const ORDER=["blue","red","green","yellow"];
 const TEAM={blue:"A",green:"A",red:"B",yellow:"B"};
+const SHADE={blue:"#0063b8",red:"#8e0d12",green:"#006428",yellow:"#b98f00"};
 const PIPS={1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};
 
+function pinSVG(c,uid){
+  const col=HEX[c];
+  return `<svg viewBox="0 0 40 52"><defs>
+    <radialGradient id="pg_${uid}" cx="35%" cy="30%" r="75%"><stop offset="0%" stop-color="#ffffff" stop-opacity=".55"/><stop offset="45%" stop-color="${col}"/><stop offset="100%" stop-color="${SHADE[c]}"/></radialGradient>
+    <linearGradient id="pw_${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#cfd6de"/></linearGradient></defs>
+    <path d="M20 50 C20 50 4 32 4 19 A16 16 0 0 1 36 19 C36 32 20 50 20 50Z" fill="url(#pw_${uid})" stroke="#6b7580" stroke-width="1.2"/>
+    <circle cx="20" cy="19" r="11.5" fill="url(#pg_${uid})" stroke="rgba(0,0,0,.35)" stroke-width="1"/>
+    <ellipse cx="16" cy="14" rx="4.2" ry="2.6" fill="#fff" opacity=".7"/>
+  </svg>`;
+}
 function renderPinBadges(){
-  $$(".pin-badge").forEach(el=>{
-    const c=el.dataset.c;
-    el.innerHTML=`<svg viewBox="0 0 32 38" fill="none"><path d="M16 2C9.37 2 4 7.37 4 14C4 23 16 36 16 36C16 36 28 23 28 14C28 7.37 22.63 2 16 2Z" fill="${HEX[c]}" stroke="#ffffff" stroke-width="2"/><circle cx="16" cy="14" r="5.5" fill="#ffffff"/></svg>`;
+  $$(".pin-badge").forEach(el=>{el.innerHTML=pinSVG(el.dataset.c,"b_"+el.dataset.c);});
+  $$(".turn-arr").forEach(el=>{
+    el.innerHTML=`<svg viewBox="0 0 40 40"><path d="M2 20 L20 3 V12 H36 V28 H20 V37 Z" fill="#ff7a1a" stroke="#8a2a00" stroke-width="2" stroke-linejoin="round"/><path d="M6 19 L19 7 V14 H34 V20 H6 Z" fill="#ffc542" opacity=".85"/></svg>`;
   });
 }
 
@@ -523,26 +532,33 @@ function star(cx,cy,R,r){
   return p+"Z";
 }
 
+function boardName(k){
+  if(G){const pl=G.players.find(p=>p.c===k);if(pl)return pl.name;}
+  return (setup.names[k]||"").trim()||LABEL[k];
+}
+function esc(t){return String(t).replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));}
 function drawBoard(){
   const s=[];
-  const WHITE="#ffffff", BORDER="#2c3e50";
+  const WHITE="#ffffff", BORDER="#3a3a3a";
   s.push(`<rect width="15" height="15" fill="${WHITE}"/>`);
 
   for(const k of ORDER){
     const [by,bx]=C[k].base;
-    s.push(`<rect x="${bx}" y="${by}" width="6" height="6" fill="${HEX[k]}" stroke="${BORDER}" stroke-width=".04"/>`);
-    s.push(`<rect x="${bx+.85}" y="${by+.85}" width="4.3" height="4.3" rx=".3" fill="#ffffff" stroke="${BORDER}" stroke-width=".03"/>`);
-    
-    let textX, textY, rot=0;
-    if(k==="red"){ textX=bx+3; textY=by+0.6; }
-    else if(k==="green"){ textX=bx+3; textY=by+0.6; rot=180; }
-    else if(k==="yellow"){ textX=bx+3; textY=by+5.6; rot=180; }
-    else { textX=bx+3; textY=by+5.6; }
-    s.push(`<text x="${textX}" y="${textY}" font-size=".5" font-family="'Segoe UI', Roboto, sans-serif" font-weight="bold" fill="#ffffff" text-anchor="middle" dominant-baseline="middle" transform="${rot?`rotate(${rot},${textX},${textY})`:''}">${C[k].name}</text>`);
+    s.push(`<rect x="${bx}" y="${by}" width="6" height="6" fill="${HEX[k]}"/>`);
+    s.push(`<rect x="${bx+1}" y="${by+1}" width="4" height="4" fill="#ffffff" stroke="rgba(0,0,0,.25)" stroke-width=".04"/>`);
+
+    // name on the outer border strip, reading like the reference
+    let x,y,rot;
+    if(k==="red"){x=bx+.5;y=by+3;rot=-90;}
+    else if(k==="green"){x=bx+3;y=by+.5;rot=180;}
+    else if(k==="yellow"){x=bx+5.5;y=by+3;rot=-90;}
+    else {x=bx+3;y=by+5.5;rot=0;}
+    s.push(`<text x="${x}" y="${y}" font-size=".58" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" fill="#ffffff" stroke="rgba(0,0,0,.55)" stroke-width=".07" paint-order="stroke" text-anchor="middle" dominant-baseline="central" transform="rotate(${rot},${x},${y})">${esc(boardName(k))}</text>`);
 
     for(const [sy,sx] of SPOTS){
-      s.push(`<circle cx="${bx+sx}" cy="${by+sy}" r=".68" fill="${HEX[k]}"/>`);
-      s.push(`<circle cx="${bx+sx}" cy="${by+sy}" r=".52" fill="#ffffff" stroke="rgba(0,0,0,.2)" stroke-width=".04"/>`);
+      s.push(`<circle cx="${bx+sx}" cy="${by+sy+.28}" r=".56" fill="${SHADE[k]}"/>`);
+      s.push(`<circle cx="${bx+sx}" cy="${by+sy+.28}" r=".5" fill="${HEX[k]}" stroke="#7a1a1a" stroke-width=".09"/>`);
+      s.push(`<circle cx="${bx+sx}" cy="${by+sy+.28}" r=".28" fill="${SHADE[k]}" opacity=".45"/>`);
     }
 
     for(const [r,c] of C[k].home){
@@ -550,35 +566,38 @@ function drawBoard(){
     }
   }
 
+  const STARTS={};for(const k of ORDER)STARTS[C[k].start]=k;
   T.forEach(([r,c],i)=>{
-    let fill=WHITE;
-    for(const k of ORDER){
-      if(C[k].start===i) fill=HEX[k];
-    }
+    const fill=STARTS[i]!==undefined?HEX[STARTS[i]]:WHITE;
     s.push(`<rect x="${c}" y="${r}" width="1" height="1" fill="${fill}" stroke="${BORDER}" stroke-width=".03"/>`);
-    if(SAFE.has(i)){
-      s.push(`<path d="${star(c+.5,r+.5,.36,.16)}" fill="none" stroke="${fill===WHITE?"#444":"#ffffff"}" stroke-width=".05"/>`);
+    if(SAFE.has(i)&&fill===WHITE){
+      s.push(`<path d="${star(c+.5,r+.5,.4,.17)}" fill="#ffffff" stroke="#555" stroke-width=".05" stroke-linejoin="round"/>`);
     }
   });
 
-  s.push(`<text x="0.5" y="7.65" font-size=".6" font-family="sans-serif" font-weight="900" fill="#222" text-anchor="middle">→</text>`);
-  s.push(`<text x="7.5" y="0.65" font-size=".6" font-family="sans-serif" font-weight="900" fill="#222" text-anchor="middle">↓</text>`);
-  s.push(`<text x="14.5" y="7.65" font-size=".6" font-family="sans-serif" font-weight="900" fill="#222" text-anchor="middle">←</text>`);
-  s.push(`<text x="7.5" y="14.65" font-size=".6" font-family="sans-serif" font-weight="900" fill="#222" text-anchor="middle">↑</text>`);
+  // entry arrows in each colour
+  const arrow=(x,y,rot,col)=>`<path d="M-.28 0 H.22 M.06 -.17 L.26 0 L.06 .17" fill="none" stroke="${col}" stroke-width=".07" stroke-linecap="round" stroke-linejoin="round" transform="translate(${x},${y}) rotate(${rot})"/>`;
+  s.push(arrow(.5,7.5,0,HEX.red));
+  s.push(arrow(7.5,.5,90,HEX.green));
+  s.push(arrow(14.5,7.5,180,HEX.yellow));
+  s.push(arrow(7.5,14.5,-90,HEX.blue));
 
-  function badge(cx,cy,color,char){
-    return `<circle cx="${cx}" cy="${cy}" r=".4" fill="${color}" stroke="#ffffff" stroke-width=".06"/><text x="${cx}" y="${cy+.12}" font-size=".42" font-family="sans-serif" font-weight="900" fill="#ffffff" text-anchor="middle">${char}</text>`;
+  s.push(`<polygon points="6,6 6,9 7.5,7.5" fill="${HEX.red}"/>`);
+  s.push(`<polygon points="6,6 9,6 7.5,7.5" fill="${HEX.green}"/>`);
+  s.push(`<polygon points="9,6 9,9 7.5,7.5" fill="${HEX.yellow}"/>`);
+  s.push(`<polygon points="6,9 9,9 7.5,7.5" fill="${HEX.blue}"/>`);
+  s.push(`<rect x="6" y="6" width="3" height="3" fill="none" stroke="${BORDER}" stroke-width=".03"/>`);
+
+  // team badges at the inner corner of each yard (teammate's colour)
+  function badge(cx,cy,color,ch,rot){
+    return `<g transform="rotate(${rot},${cx},${cy})"><circle cx="${cx}" cy="${cy}" r=".42" fill="#ffffff"/><circle cx="${cx}" cy="${cy}" r=".35" fill="${color}"/><text x="${cx}" y="${cy}" font-size=".44" font-family="sans-serif" font-weight="900" fill="#ffffff" stroke="rgba(0,0,0,.35)" stroke-width=".04" paint-order="stroke" text-anchor="middle" dominant-baseline="central">${ch}</text></g>`;
   }
-  s.push(badge(5.5,6.5,HEX.red,"B"));
-  s.push(badge(8.5,5.5,HEX.blue,"A"));
-  s.push(badge(9.5,8.5,HEX.red,"B"));
-  s.push(badge(6.5,9.5,HEX.green,"A"));
+  s.push(badge(5.5,5.4,HEX.yellow,"B",-30));
+  s.push(badge(9.5,5.4,HEX.blue,"A",150));
+  s.push(badge(5.5,9.6,HEX.green,"A",-30));
+  s.push(badge(9.5,9.6,HEX.red,"B",-30));
 
-  s.push(`<polygon points="6,6 6,9 7.5,7.5" fill="${HEX.red}" stroke="${BORDER}" stroke-width=".03"/>`);
-  s.push(`<polygon points="6,6 9,6 7.5,7.5" fill="${HEX.green}" stroke="${BORDER}" stroke-width=".03"/>`);
-  s.push(`<polygon points="9,6 9,9 7.5,7.5" fill="${HEX.yellow}" stroke="${BORDER}" stroke-width=".03"/>`);
-  s.push(`<polygon points="6,9 9,9 7.5,7.5" fill="${HEX.blue}" stroke="${BORDER}" stroke-width=".03"/>`);
-
+  s.push(`<rect x="0" y="0" width="15" height="15" fill="none" stroke="${BORDER}" stroke-width=".06"/>`);
   $("#board").innerHTML=s.join("");
 }
 
@@ -617,9 +636,10 @@ $("#fkSw").onclick=()=>{setup.fk=!setup.fk;$("#fkSw").classList.toggle("on",setu
     if(s.id===id) s.classList.add("on");
     else s.classList.remove("on");
   });
+  document.body.classList.toggle("ingame",id==="game");
 }
 function setFace(el,v){
-  el.innerHTML="";
+  el.innerHTML="";el.classList.toggle("has",!!v);
   for(let i=0;i<9;i++){
     const d=document.createElement("i");
     if(v&&PIPS[v].includes(i))d.className="on";
@@ -639,6 +659,7 @@ function toast(t){
     setFace(p.querySelector(".face"),0);
     p.querySelector(".dice").onclick=()=>roll(c);
   });
+  drawBoard();
   buildTokens();
   show("game");
   beginTurn();
@@ -672,22 +693,7 @@ function buildTokens(){
   for(const p of G.players)for(let i=0;i<4;i++){
     const t=document.createElement("div");
     t.className="tok";t.dataset.c=p.c;t.dataset.i=i;
-    t.innerHTML=`
-      <svg viewBox="0 0 100 130">
-        <ellipse cx="50" cy="115" rx="34" ry="12" fill="${HEX[p.c]}" stroke="#222" stroke-width="2"/>
-        <ellipse cx="50" cy="113" rx="26" ry="8" fill="#ffffff" stroke="#555" stroke-width="1.5"/>
-        <path d="M 32 110 C 30 75, 40 50, 42 42 C 40 40, 36 30, 36 24 C 36 12, 64 12, 64 24 C 64 30, 60 40, 58 42 C 60 50, 70 75, 68 110 Z" fill="url(#bodyGrad_${p.c})" stroke="#333" stroke-width="2"/>
-        <ellipse cx="50" cy="22" rx="10" ry="10" fill="${HEX[p.c]}"/>
-        <ellipse cx="47" cy="18" rx="4" ry="2.5" fill="#ffffff" opacity="0.8"/>
-        <defs>
-          <linearGradient id="bodyGrad_${p.c}" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#ffffff"/>
-            <stop offset="65%" stop-color="#f0f0f0"/>
-            <stop offset="100%" stop-color="#b0b0b0"/>
-          </linearGradient>
-        </defs>
-      </svg>
-    `;
+    t.innerHTML=pinSVG(p.c,"t_"+p.c+i);
     t.onclick=()=>choose(p.c,i);
     box.appendChild(t);
   }
