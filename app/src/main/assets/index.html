@@ -628,7 +628,7 @@ function setFace(el,v){
 }
 function msg(t){$("#msg").textContent=t;}
 function toast(t){
-  const e=$("#toast");e.textContent=t;e.classList.add("on");   clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("on"),1500); } const cur=()=>G.players[G.turn].c; const nameOf=c=>G.players.find(p=>p.c===c).name;  function startGame(){   try{ SFX.init(); }catch(e){}   const cols=activeColors();   G={     mode:setup.mode,fk:setup.fk,     players:cols.map(c=>({c,name:(setup.names[c]\vert{}\vert{}"").trim()\vert{}\vert{}LABEL[c]})),     tokens:{},turn:0,phase:"roll",dice:0,sixes:0,done:[],over:false   };   cols.forEach(c=>G.tokens[c]=[-1,-1,-1,-1]);   $$(".pan").forEach(p=>{
+  const e=$("#toast");e.textContent=t;e.classList.add("on");   clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("on"),1500); } const cur=()=>G.players[G.turn].c; const nameOf=c=>G.players.find(p=>p.c===c).name;  function startGame(){   try{ SFX.init(); }catch(e){}   const cols=activeColors();   G={     mode:setup.mode,fk:setup.fk,     players:cols.map(c=>({c,name:(setup.names[c]||"").trim()||LABEL[c]})),     tokens:{},turn:0,phase:"roll",dice:0,sixes:0,done:[],over:false   };   cols.forEach(c=>G.tokens[c]=[-1,-1,-1,-1]);   $$(".pan").forEach(p=>{
     const c=p.dataset.c,pl=G.players.find(x=>x.c===c);
     p.classList.toggle("hide",!pl);p.classList.remove("done","act","canroll");
     const nm=p.querySelector(".pname");nm.innerHTML="";
@@ -865,7 +865,7 @@ window.onNearby=function(ev,data){
   }
 };
 
-function openPair(){$("#codeIn").value=store.get("cl_last")\vert{}\vert{}"";$("#pairOv").classList.add("on");}
+function openPair(){$("#codeIn").value=store.get("cl_last")||"";$("#pairOv").classList.add("on");}
 $("#pairClose").onclick=()=>$("#pairOv").classList.remove("on");
 $("#codeIn").oninput=e=>{e.target.value=e.target.value.replace(/\D/g,"").slice(0,6);};
 $("#pairGo").onclick=()=>{
